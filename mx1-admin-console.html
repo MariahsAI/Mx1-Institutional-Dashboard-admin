@@ -181,6 +181,28 @@
   .toast{background:linear-gradient(180deg,#12162a,#0c0e1a);border-color:var(--line);color:var(--text);box-shadow:0 18px 46px rgba(0,0,0,.6)}
   .gate{background:radial-gradient(1000px 700px at 70% 10%, #12224A, #070A16 70%)}
   .status.st-live{box-shadow:0 0 16px rgba(53,227,154,.14)}
+  .mariah .hd h2{display:flex;align-items:center;gap:8px}
+  .mariah-mark{width:20px;height:20px;border-radius:6px;display:inline-grid;place-items:center;font-size:11px;font-weight:800;
+    background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#03121a;box-shadow:0 0 14px rgba(63,233,255,.5)}
+  .mrh-body{padding:16px 18px}
+  .mrh-top{display:flex;align-items:flex-end;justify-content:space-between;gap:16px}
+  .mrh-bias{font-family:var(--disp);font-weight:700;font-size:26px;letter-spacing:.5px;margin-top:4px}
+  .mrh-bias.long{color:var(--pos);text-shadow:0 0 22px rgba(58,203,146,.4)}
+  .mrh-bias.short{color:var(--neg);text-shadow:0 0 22px rgba(255,92,108,.4)}
+  .mrh-conv{text-align:right;min-width:150px}
+  .mrh-convval{font-family:var(--mono);font-size:20px;font-weight:600;margin-top:4px}
+  .mrh-meter{height:6px;border-radius:4px;background:rgba(255,255,255,.08);margin-top:8px;overflow:hidden}
+  .mrh-meter>div{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--accent),var(--accent-2));box-shadow:0 0 12px rgba(63,233,255,.5);transition:width .5s}
+  .mrh-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 20px;padding:15px 0;margin-top:14px;border-top:1px solid var(--line-soft);border-bottom:1px solid var(--line-soft)}
+  .mrh-grid>div{display:flex;justify-content:space-between;font-size:12.5px}
+  .mrh-grid .k{color:var(--muted)}
+  .mrh-grid .v{font-family:var(--mono);font-weight:500}
+  .mrh-sig{padding:14px 0 2px;display:flex;flex-direction:column;gap:9px}
+  .mrh-sig .s{display:flex;gap:9px;align-items:flex-start;font-size:12px;color:var(--muted);line-height:1.45}
+  .mrh-sig .s svg{flex:none;margin-top:2px;color:var(--accent-2)}
+  .apply-btn{width:100%;margin-top:12px;border:1px solid var(--accent);border-radius:10px;padding:12px;cursor:pointer;
+    font-family:var(--disp);font-weight:600;font-size:13px;color:var(--accent-2);background:var(--accent-soft);transition:.15s}
+  .apply-btn:hover{background:rgba(106,120,255,.2)}
   ::-webkit-scrollbar{width:10px;height:10px}
   ::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:6px;border:2px solid transparent;background-clip:padding-box}
   ::-webkit-scrollbar-track{background:transparent}
@@ -241,25 +263,46 @@
         <div class="hd"><h2>Trade desk</h2><span class="eyebrow" style="color:var(--accent)">Executes on selected account</span></div>
         <div class="desk-body">
           <div class="field"><label>Account</label><select id="deskAcct"></select></div>
-          <div class="field"><label>Pair</label><select><option>BTC/USDT</option><option>ETH/USDT</option><option>SOL/USDT</option><option>AVAX/USDT</option></select></div>
-          <div class="field"><label>Side</label><div class="seg side"><button class="buy sel" onclick="pick(this)">Long</button><button class="sell" onclick="pick(this)">Short</button></div></div>
+          <div class="field"><label>Pair</label><select id="deskPair" onchange="setPair(this.value)"><option>BTC/USDT</option><option>ETH/USDT</option><option>SOL/USDT</option><option>AVAX/USDT</option></select></div>
+          <div class="field"><label>Side</label><div class="seg side" id="deskSide"><button class="buy sel" onclick="pick(this)">Long</button><button class="sell" onclick="pick(this)">Short</button></div></div>
           <div class="field"><label>Order type</label><div class="seg"><button class="sel" onclick="pick(this)">Market</button><button onclick="pick(this)">Limit</button><button onclick="pick(this)">TWAP</button></div></div>
-          <div class="field"><label>Size (USDT)</label><input class="mono" value="250,000" /></div>
+          <div class="field"><label>Size (USDT)</label><input id="deskSize" class="mono" value="250,000" /></div>
           <div class="field"><label>Leverage</label><div class="seg"><button onclick="pick(this)">2×</button><button class="sel" onclick="pick(this)">5×</button><button onclick="pick(this)">10×</button><button onclick="pick(this)">20×</button></div></div>
-          <div class="field rw"><div style="flex:1"><label>Take profit</label><input class="mono" value="72,400" /></div><div style="flex:1"><label>Stop loss</label><input class="mono" value="66,900" /></div></div>
+          <div class="field rw"><div style="flex:1"><label>Take profit</label><input id="deskTp" class="mono" value="72,400" /></div><div style="flex:1"><label>Stop loss</label><input id="deskSl" class="mono" value="66,900" /></div></div>
           <button class="exec-btn" onclick="execTrade()">Execute on account</button>
         </div>
       </div>
-      <div class="card">
-        <div class="hd"><h2>Smart-route preview</h2></div>
-        <div class="bars">
-          <div class="barrow"><span>OKX US</span><div class="track"><div class="fill" style="width:62%;background:var(--accent)"></div></div><span class="amt">62% · best bid</span></div>
-          <div class="barrow"><span>Binance.US</span><div class="track"><div class="fill" style="width:24%;background:var(--muted-2)"></div></div><span class="amt">24%</span></div>
-          <div class="barrow"><span>Coinbase</span><div class="track"><div class="fill" style="width:14%;background:var(--muted-2)"></div></div><span class="amt">14%</span></div>
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <div class="card mariah" id="mariahCard">
+          <div class="hd"><h2><span class="mariah-mark">◇</span> Mariah · prediction</h2><span class="eyebrow" id="mrhPair" style="color:var(--accent-2)">BTC/USDT</span></div>
+          <div class="mrh-body">
+            <div class="mrh-top">
+              <div><div class="eyebrow">Signal</div><div class="mrh-bias long" id="mrhBias">LONG</div></div>
+              <div class="mrh-conv"><div class="eyebrow">Conviction</div><div class="mrh-convval" id="mrhConv">78%</div><div class="mrh-meter"><div id="mrhMeterFill" style="width:78%"></div></div></div>
+            </div>
+            <div class="mrh-grid">
+              <div><span class="k">Entry zone</span><span class="v" id="mrhEntry">$69,510</span></div>
+              <div><span class="k">Target</span><span class="v pos" id="mrhTarget">$73,200</span></div>
+              <div><span class="k">Suggested TP</span><span class="v" id="mrhTp">$72,400</span></div>
+              <div><span class="k">Suggested SL</span><span class="v" id="mrhSl">$66,900</span></div>
+              <div><span class="k">Timeframe</span><span class="v" id="mrhTf">4H–1D</span></div>
+              <div><span class="k">Modeled edge</span><span class="v" id="mrhEdge">+5.3%</span></div>
+            </div>
+            <div class="mrh-sig" id="mrhSignals"></div>
+            <button class="apply-btn" onclick="applyPrediction()">Apply Mariah's call to order</button>
+          </div>
         </div>
-        <div style="padding:0 20px 16px;font-size:12px;color:var(--muted);line-height:1.6">Router estimate: <b class="mono" style="color:var(--text)">4 bps</b> slippage across 6 slices, maker-skewed for rebate.</div>
-        <div class="hd" style="border-top:1px solid var(--line-soft)"><h2>Global agent activity</h2><span class="eyebrow" style="color:var(--gold)">21 agents · all accounts</span></div>
-        <div class="log" id="feed" style="max-height:180px"></div>
+        <div class="card">
+          <div class="hd"><h2>Smart-route preview</h2></div>
+          <div class="bars">
+            <div class="barrow"><span>OKX US</span><div class="track"><div class="fill" style="width:62%;background:var(--accent)"></div></div><span class="amt">62% · best bid</span></div>
+            <div class="barrow"><span>Binance.US</span><div class="track"><div class="fill" style="width:24%;background:var(--muted-2)"></div></div><span class="amt">24%</span></div>
+            <div class="barrow"><span>Coinbase</span><div class="track"><div class="fill" style="width:14%;background:var(--muted-2)"></div></div><span class="amt">14%</span></div>
+          </div>
+          <div style="padding:0 20px 16px;font-size:12px;color:var(--muted);line-height:1.6">Router estimate: <b class="mono" style="color:var(--text)">4 bps</b> slippage across 6 slices, maker-skewed for rebate.</div>
+          <div class="hd" style="border-top:1px solid var(--line-soft)"><h2>Global agent activity</h2><span class="eyebrow" style="color:var(--gold)">21 agents · all accounts</span></div>
+          <div class="log" id="feed" style="max-height:180px"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -340,7 +383,59 @@
     renderAccounts();refreshKpis();toast(accounts[i].id+' flattened and halted');
   }
   function deskFor(i){document.getElementById('deskAcct').value=i;document.getElementById('deskAcct').scrollIntoView({behavior:'smooth',block:'center'});toast('Trade desk set to '+accounts[i].id)}
-  function execTrade(){const i=+document.getElementById('deskAcct').value;feedLine('ADMIN',`Admin executed <em>BTC/USDT long 250k</em> on ${accounts[i].id} · OKX · 5×`);toast('Order executed on '+accounts[i].id+' · logged to audit trail')}
+
+  /* ---------- Mariah predictions ---------- */
+  const PRICES={BTC:69510,ETH:3388,SOL:176.9,AVAX:40.42};
+  const PRED={
+    'BTC/USDT':{coin:'BTC',bias:'LONG',conv:78,entry:69510,target:73200,tp:72400,sl:66900,tf:'4H–1D',edge:'+5.3%',sig:['Momentum breakout confirmed on the 4H','Funding neutral — move is spot-led','Large-wallet accumulation on-chain']},
+    'ETH/USDT':{coin:'ETH',bias:'LONG',conv:71,entry:3388,target:3620,tp:3560,sl:3180,tf:'4H',edge:'+6.8%',sig:['ETH/BTC basing — rotation setup','L2 + gas activity trending up','Reclaimed the 20-day EMA']},
+    'SOL/USDT':{coin:'SOL',bias:'LONG',conv:66,entry:176.9,target:198,tp:198,sl:158,tf:'1D',edge:'+11.9%',sig:['Broke above the multi-week range high','Thin sell liquidity up to $198','Perp open interest rising with price']},
+    'AVAX/USDT':{coin:'AVAX',bias:'SHORT',conv:58,entry:40.42,target:36.5,tp:36.5,sl:44,tf:'4H',edge:'+9.7%',sig:['Lower-high structure on the 4H','Relative weakness vs. majors','Momentum rolling over on RSI']},
+  };
+  let curPair='BTC/USDT';
+  const usd=n=>'$'+n.toLocaleString('en-US');
+  function setPair(p){curPair=p;const s=document.getElementById('deskPair');if(s&&s.value!==p)s.value=p;renderPrediction(p);}
+  function renderPrediction(p){
+    const d=PRED[p];if(!d)return;
+    document.getElementById('mrhPair').textContent=p;
+    const b=document.getElementById('mrhBias');b.textContent=d.bias;b.className='mrh-bias '+(d.bias==='LONG'?'long':'short');
+    document.getElementById('mrhConv').textContent=d.conv+'%';
+    document.getElementById('mrhMeterFill').style.width=d.conv+'%';
+    document.getElementById('mrhEntry').textContent=usd(d.entry);
+    const tg=document.getElementById('mrhTarget');tg.textContent=usd(d.target);tg.className='v '+(d.bias==='LONG'?'pos':'neg');
+    document.getElementById('mrhTp').textContent=usd(d.tp);
+    document.getElementById('mrhSl').textContent=usd(d.sl);
+    document.getElementById('mrhTf').textContent=d.tf;
+    document.getElementById('mrhEdge').textContent=d.edge;
+    document.getElementById('mrhSignals').innerHTML=d.sig.map(s=>`<div class="s"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>${s}</div>`).join('');
+  }
+  function applyPrediction(){
+    const d=PRED[curPair];if(!d)return;
+    const side=document.getElementById('deskSide');side.querySelectorAll('button').forEach(x=>x.classList.remove('sel'));
+    side.querySelector(d.bias==='LONG'?'.buy':'.sell').classList.add('sel');
+    document.getElementById('deskTp').value=d.tp.toLocaleString('en-US');
+    document.getElementById('deskSl').value=d.sl.toLocaleString('en-US');
+    toast('Applied Mariah’s '+d.bias+' setup for '+curPair);
+  }
+
+  /* ---------- shared trade store (syncs to client portal, same origin) ---------- */
+  const STORE_KEY='mx1_trades';
+  function loadTrades(){try{return JSON.parse(localStorage.getItem(STORE_KEY)||'[]')}catch(e){return[]}}
+  function saveTrades(a){try{localStorage.setItem(STORE_KEY,JSON.stringify(a))}catch(e){}}
+  function execTrade(){
+    const i=+document.getElementById('deskAcct').value;const acct=accounts[i];
+    const pair=document.getElementById('deskPair').value, coin=PRED[pair].coin;
+    const sideBtn=document.querySelector('#deskSide button.sel');
+    const side=sideBtn&&sideBtn.classList.contains('sell')?'short':'long';
+    const notional=parseFloat((document.getElementById('deskSize').value||'').replace(/[^0-9.]/g,''))||0;
+    const tp=parseFloat((document.getElementById('deskTp').value||'').replace(/[^0-9.]/g,''))||0;
+    const sl=parseFloat((document.getElementById('deskSl').value||'').replace(/[^0-9.]/g,''))||0;
+    const trade={id:'T'+Date.now()+Math.floor(Math.random()*1000),account:acct.id,pair,coin,side,notional,entry:PRICES[coin],tp,sl,type:'Futures',ts:Date.now()};
+    const all=loadTrades();all.push(trade);saveTrades(all);
+    acct.pos=(acct.pos||0)+1;renderAccounts();refreshKpis();
+    feedLine('ADMIN',`Admin executed <em>${pair} ${side} ${Math.round(notional/1000)}k</em> on ${acct.id} · routed OKX`);
+    toast('Order executed on '+acct.id+' → pushed to client portal');
+  }
   function pick(b){b.parentNode.querySelectorAll('button').forEach(x=>x.classList.remove('sel'));b.classList.add('sel')}
 
   /* ---------- feed ---------- */
@@ -351,7 +446,7 @@
 
   let feedTimer,aumTimer;
   function init(){
-    renderAccounts();refreshKpis();fillDeskAcct();
+    renderAccounts();refreshKpis();fillDeskAcct();renderPrediction(curPair);
     /* AUM count-up */
     const target=accounts.reduce((s,a)=>s+a.nav,0),el=document.getElementById('aum'),st=performance.now();
     (function up(now){const p=Math.min((now-st)/900,1),e=1-Math.pow(1-p,3);el.textContent='$'+(target*e/1e6).toFixed(2)+'M';if(p<1)requestAnimationFrame(up)})(st);
