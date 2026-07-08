@@ -6,22 +6,27 @@
 <title>MX1 Admin Console — Managed Accounts Desk</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
 <style>
   :root{
-    --bg:#EEF2F8;--panel:#FFFFFF;--panel-2:#F6F9FC;
-    --line:#E2E7F1;--line-soft:#EDF1F7;--text:#101A31;--muted:#596783;--muted-2:#96A2BA;
-    --gold:#B07C14;--gold-soft:rgba(176,124,20,.12);--gold-line:rgba(176,124,20,.34);
-    --pos:#07B266;--pos-soft:rgba(7,178,102,.12);--neg:#F0393F;--neg-soft:rgba(240,57,63,.10);
-    --amber:#E08A0B;--accent:#4457F5;--accent-2:#00C2D4;--accent-soft:rgba(68,87,245,.09);
-    --radius:13px;--shadow:0 1px 2px rgba(16,26,49,.05),0 4px 14px rgba(16,26,49,.06);--shadow-lg:0 12px 36px rgba(16,26,49,.13);
-    --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;--disp:"Space Grotesk",system-ui,sans-serif;--ui:"Inter",system-ui,sans-serif;
+    --bg:#06070E;--panel:#0C0F1A;--panel-2:#11141F;
+    --line:rgba(255,255,255,.09);--line-soft:rgba(255,255,255,.055);--text:#EAF0FF;--muted:#8B95AE;--muted-2:#59627E;
+    --gold:#E4C88E;--gold-soft:rgba(228,200,142,.12);--gold-line:rgba(228,200,142,.36);
+    --pos:#3ACB92;--pos-soft:rgba(58,203,146,.14);--neg:#FF5C6C;--neg-soft:rgba(255,92,108,.13);
+    --amber:#F2B34D;--accent:#6A78FF;--accent-2:#3FE9FF;--accent-soft:rgba(106,120,255,.14);
+    --glass:rgba(255,255,255,.045);--glass-2:rgba(255,255,255,.075);
+    --radius:14px;--shadow:0 1px 1px rgba(0,0,0,.4),0 10px 34px rgba(0,0,0,.5);--shadow-lg:0 20px 60px rgba(0,0,0,.6),0 0 0 1px rgba(255,255,255,.04);
+    --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;--disp:"Sora",system-ui,sans-serif;--ui:"Inter",system-ui,sans-serif;
   }
   *{box-sizing:border-box}html,body{margin:0;padding:0}
-  body{background:
-    radial-gradient(900px 440px at 100% -6%, rgba(68,87,245,.08), transparent 60%),
-    radial-gradient(720px 420px at -6% 104%, rgba(0,194,212,.06), transparent 55%),var(--bg);
-    color:var(--text);font-family:var(--ui);-webkit-font-smoothing:antialiased;min-height:100vh}
+  body{background:var(--bg);color:var(--text);font-family:var(--ui);-webkit-font-smoothing:antialiased;min-height:100vh;position:relative}
+  body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
+    background:radial-gradient(900px 620px at 82% -8%, rgba(106,120,255,.16), transparent 60%),
+      radial-gradient(760px 560px at 6% 12%, rgba(63,233,255,.10), transparent 58%),
+      radial-gradient(900px 700px at 50% 116%, rgba(228,200,142,.08), transparent 60%);
+    animation:aurora 22s ease-in-out infinite alternate}
+  @keyframes aurora{0%{transform:translate3d(0,0,0) scale(1)}50%{transform:translate3d(-2%,1.5%,0) scale(1.06)}100%{transform:translate3d(2%,-1%,0) scale(1.03)}}
+  body>*{position:relative;z-index:1}
   .mono{font-family:var(--mono);font-variant-numeric:tabular-nums}.pos{color:var(--pos)}.neg{color:var(--neg)}
 
   /* ---------- gate ---------- */
@@ -150,6 +155,35 @@
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
   .sec-title{font-family:var(--disp);font-size:12px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);margin:22px 0 12px}
   @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+  /* ===== obsidian-glass theme layer ===== */
+  .kpi,.card{background:linear-gradient(180deg,var(--glass),rgba(255,255,255,.015));backdrop-filter:blur(18px);overflow:hidden}
+  .kpi::after,.card::after{content:"";position:absolute;left:0;right:0;top:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.22),transparent);pointer-events:none}
+  .kpi.hero{background:linear-gradient(140deg,#0b0e1c,#111a3a 55%,#0a0d1a)}
+  .kpi.hero .v{text-shadow:0 0 30px rgba(63,233,255,.28)}
+  .kpi:not(.hero){box-shadow:var(--shadow),inset 0 0 46px rgba(106,120,255,.07)}
+  .kpi:not(.hero):hover{box-shadow:var(--shadow-lg),inset 0 0 52px rgba(106,120,255,.1)}
+  .kpi:not(.hero)::before{width:3px;box-shadow:0 0 18px rgba(63,233,255,.6),0 0 6px rgba(63,233,255,.85)}
+  tbody tr:hover{background:rgba(255,255,255,.03)}
+  thead th{background:transparent}
+  .acct .av{box-shadow:0 0 0 1px rgba(255,255,255,.1)}
+  .mini,.field input,.field select,.seg button{background:var(--glass);border-color:var(--line);color:var(--text)}
+  .mini{color:var(--muted)}
+  .mini:hover{border-color:rgba(255,255,255,.22);color:var(--text)}
+  .mini.trade{background:linear-gradient(135deg,var(--accent),var(--accent-2));border-color:transparent;color:#03121a}
+  .mini.trade:hover{filter:brightness(1.08);color:#03121a}
+  .seg button{color:var(--muted)}
+  .field input::placeholder{color:var(--muted-2)}
+  .barrow .track{background:rgba(255,255,255,.06)}
+  .exec-btn{background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#03121a;box-shadow:0 6px 22px rgba(63,233,255,.28)}
+  .lockbtn{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.2)}
+  .topbar{background:linear-gradient(135deg,rgba(11,14,28,.86),rgba(17,26,58,.8));backdrop-filter:blur(20px);border-bottom:1px solid var(--line)}
+  .rights{background:var(--glass);border-color:rgba(106,120,255,.24)}
+  .toast{background:linear-gradient(180deg,#12162a,#0c0e1a);border-color:var(--line);color:var(--text);box-shadow:0 18px 46px rgba(0,0,0,.6)}
+  .gate{background:radial-gradient(1000px 700px at 70% 10%, #12224A, #070A16 70%)}
+  .status.st-live{box-shadow:0 0 16px rgba(53,227,154,.14)}
+  ::-webkit-scrollbar{width:10px;height:10px}
+  ::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:6px;border:2px solid transparent;background-clip:padding-box}
+  ::-webkit-scrollbar-track{background:transparent}
 </style>
 </head>
 <body>
@@ -247,10 +281,10 @@
 
   /* ---------- data ---------- */
   const accounts=[
-    {id:'INST-4471',name:'Meridian Fund LP',nav:4218904,day:38410,dp:0.92,lev:'1.9×',pos:4,status:'live',c:'#4457F5'},
-    {id:'INST-4472',name:'Halcyon Digital',nav:8740215,day:-21400,dp:-0.24,lev:'2.4×',pos:6,status:'live',c:'#07B266'},
-    {id:'INST-4491',name:'Northwind Capital',nav:5320000,day:47120,dp:0.89,lev:'2.1×',pos:5,status:'live',c:'#E08A0B'},
-    {id:'INST-4480',name:'Ferrucci Family Office',nav:2015680,day:12890,dp:0.64,lev:'0.0×',pos:0,status:'paused',c:'#00C2D4'},
+    {id:'INST-4471',name:'Meridian Fund LP',nav:4218904,day:38410,dp:0.92,lev:'1.9×',pos:4,status:'live',c:'#5A66A8'},
+    {id:'INST-4472',name:'Halcyon Digital',nav:8740215,day:-21400,dp:-0.24,lev:'2.4×',pos:6,status:'live',c:'#2E7E78'},
+    {id:'INST-4491',name:'Northwind Capital',nav:5320000,day:47120,dp:0.89,lev:'2.1×',pos:5,status:'live',c:'#9C8038'},
+    {id:'INST-4480',name:'Ferrucci Family Office',nav:2015680,day:12890,dp:0.64,lev:'0.0×',pos:0,status:'paused',c:'#5A6785'},
   ];
   const money=n=>'$'+Math.round(n).toLocaleString('en-US');
   const initials=n=>n.split(' ').slice(0,2).map(w=>w[0]).join('');
