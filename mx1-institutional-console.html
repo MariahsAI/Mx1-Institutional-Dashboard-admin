@@ -358,6 +358,18 @@
   .modal{background:linear-gradient(180deg,#0f1324,#0a0c16);border-color:var(--line);box-shadow:0 30px 80px rgba(0,0,0,.7)}
   .toast{background:linear-gradient(180deg,#12162a,#0c0e1a);border-color:var(--line);color:var(--text);box-shadow:0 18px 46px rgba(0,0,0,.6)}
   .side-acct .tier{box-shadow:0 0 20px rgba(228,200,142,.12)}
+  .mariah-mark{width:20px;height:20px;border-radius:6px;display:inline-grid;place-items:center;font-size:11px;font-weight:800;background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#03121a;box-shadow:0 0 14px rgba(63,233,255,.5)}
+  .card .hd h2{display:flex;align-items:center;gap:8px}
+  .mrh-read{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line-soft)}
+  .mrh-cell{background:var(--panel);padding:15px 16px}
+  .mrh-cell .pr{font-family:var(--ui);font-weight:600;font-size:13px;display:flex;align-items:center;justify-content:space-between}
+  .mrh-cell .bias{font-family:var(--disp);font-size:10px;font-weight:700;letter-spacing:.5px;padding:3px 8px;border-radius:6px}
+  .mrh-cell .bias.long{background:var(--pos-soft);color:var(--pos)}
+  .mrh-cell .bias.short{background:var(--neg-soft);color:var(--neg)}
+  .mrh-cell .conv{height:5px;border-radius:3px;background:rgba(255,255,255,.08);margin-top:11px;overflow:hidden}
+  .mrh-cell .conv>div{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--accent),var(--accent-2));box-shadow:0 0 10px rgba(63,233,255,.4)}
+  .mrh-cell .row2{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:9px}
+  @media(max-width:900px){.mrh-read{grid-template-columns:1fr 1fr}}
   ::-webkit-scrollbar{width:10px;height:10px}
   ::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:6px;border:2px solid transparent;background-clip:padding-box}
   ::-webkit-scrollbar-track{background:transparent}
@@ -475,6 +487,11 @@
               </div>
             </div>
           </div>
+        </div>
+
+        <div class="card" style="margin-bottom:16px">
+          <div class="hd"><h2><span class="mariah-mark">◇</span> Mariah’s market read</h2><span class="eyebrow" style="color:var(--accent-2)">Live signals · Fusion picks the trade</span></div>
+          <div class="mrh-read" id="mariahRead"></div>
         </div>
 
         <div class="grid g-2">
@@ -776,6 +793,44 @@
   function pushFeed(){if(document.body.classList.contains('paused'))return;const[t,m]=msgs[Math.floor(Math.random()*msgs.length)];feedLine(ovFeed,t,m);feedLine(audit,t,m);while(ovFeed.children.length>7)ovFeed.lastChild.remove();while(audit.children.length>40)audit.lastChild.remove();}
   for(let i=0;i<6;i++)pushFeed();
   setInterval(pushFeed,2600);
+
+  /* ---------- Mariah market read ---------- */
+  const PRED={
+    'BTC/USDT':{bias:'LONG',conv:78,target:73200,tf:'4H–1D'},
+    'ETH/USDT':{bias:'LONG',conv:71,target:3620,tf:'4H'},
+    'SOL/USDT':{bias:'LONG',conv:66,target:198,tf:'1D'},
+    'AVAX/USDT':{bias:'SHORT',conv:58,target:36.5,tf:'4H'},
+  };
+  function renderMariahRead(){
+    const el=document.getElementById('mariahRead');if(!el)return;
+    el.innerHTML=Object.entries(PRED).map(([p,d])=>{
+      const cls=d.bias==='LONG'?'long':'short';
+      return `<div class="mrh-cell"><div class="pr">${p}<span class="bias ${cls}">${d.bias}</span></div>
+        <div class="conv"><div style="width:${d.conv}%"></div></div>
+        <div class="row2"><span>Conviction ${d.conv}%</span><span>Target $${d.target.toLocaleString('en-US')}</span></div>
+        <div class="row2"><span>Timeframe ${d.tf}</span><span>MX1 · Fusion</span></div></div>`;
+    }).join('');
+  }
+  renderMariahRead();
+
+  /* ---------- receive trades placed by MX1 admin (same-origin sync) ---------- */
+  const ACCOUNT_ID='INST-4471';
+  const STORE_KEY='mx1_trades';
+  const appliedTrades=new Set();
+  function loadTrades(){try{return JSON.parse(localStorage.getItem(STORE_KEY)||'[]')}catch(e){return[]}}
+  function tradeToPosition(t){
+    const sizeCoin=t.notional/t.entry;
+    const sizeStr=sizeCoin>=100?Math.round(sizeCoin).toLocaleString('en-US'):sizeCoin.toFixed(2);
+    return {id:t.id,sym:t.pair,coin:t.coin,type:t.type||'Futures',side:t.side,size:sizeStr,notional:t.notional,entry:t.entry,mark:t.entry,tp:t.tp,sl:t.sl,pnl:0,pct:0};
+  }
+  function syncTrades(live){
+    const mine=loadTrades().filter(t=>t.account===ACCOUNT_ID);let added=0;
+    mine.forEach(t=>{if(!appliedTrades.has(t.id)){appliedTrades.add(t.id);positions.push(tradeToPosition(t));added++;
+      if(live){feedLine(audit,'ADMIN',`MX1 opened <em>${t.pair} ${t.side}</em> on your account`);feedLine(ovFeed,'ADMIN',`MX1 opened <em>${t.pair} ${t.side}</em>`);}}});
+    if(added){renderPositions();if(live)toast(added+' new trade'+(added>1?'s':'')+' placed by MX1 on your account');}
+  }
+  syncTrades(false);
+  window.addEventListener('storage',e=>{if(e.key===STORE_KEY)syncTrades(true)});
 
   /* ---------- live nav ---------- */
   let nav=4218904,day=38410;
