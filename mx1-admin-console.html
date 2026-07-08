@@ -244,9 +244,6 @@
   }
   function backToClient(){location.href='mx1-institutional-console.html'}
   function lockExit(){location.hash='';location.href='mx1-institutional-console.html'}
-  /* arrive already authenticated from the client page's password step */
-  if(location.hash==='#auth-ok'){reveal();}
-  else{setTimeout(()=>document.getElementById('pw').focus(),80);}
 
   /* ---------- data ---------- */
   const accounts=[
@@ -334,6 +331,10 @@
   }
 
   let tT;function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(tT);tT=setTimeout(()=>t.classList.remove('show'),3000)}
+
+  /* run last — everything above is now defined */
+  if(location.hash==='#auth-ok'){reveal();}
+  else{setTimeout(()=>document.getElementById('pw').focus(),80);}
 </script>
 </body>
 </html>
