@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>MX1 Admin Console — Managed Accounts Desk</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --bg:#EEF2F8;--panel:#FFFFFF;--panel-2:#F6F9FC;
+    --line:#E2E7F1;--line-soft:#EDF1F7;--text:#101A31;--muted:#596783;--muted-2:#96A2BA;
+    --gold:#B07C14;--gold-soft:rgba(176,124,20,.12);--gold-line:rgba(176,124,20,.34);
+    --pos:#07B266;--pos-soft:rgba(7,178,102,.12);--neg:#F0393F;--neg-soft:rgba(240,57,63,.10);
+    --amber:#E08A0B;--accent:#4457F5;--accent-2:#00C2D4;--accent-soft:rgba(68,87,245,.09);
+    --radius:13px;--shadow:0 1px 2px rgba(16,26,49,.05),0 4px 14px rgba(16,26,49,.06);--shadow-lg:0 12px 36px rgba(16,26,49,.13);
+    --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;--disp:"Space Grotesk",system-ui,sans-serif;--ui:"Inter",system-ui,sans-serif;
+  }
+  *{box-sizing:border-box}html,body{margin:0;padding:0}
+  body{background:
+    radial-gradient(900px 440px at 100% -6%, rgba(68,87,245,.08), transparent 60%),
+    radial-gradient(720px 420px at -6% 104%, rgba(0,194,212,.06), transparent 55%),var(--bg);
+    color:var(--text);font-family:var(--ui);-webkit-font-smoothing:antialiased;min-height:100vh}
+  .mono{font-family:var(--mono);font-variant-numeric:tabular-nums}.pos{color:var(--pos)}.neg{color:var(--neg)}
+
+  /* ---------- gate ---------- */
+  .gate{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:20px;
+    background:linear-gradient(135deg,#0A1327 0%,#12224A 60%,#0A1B3C 100%)}
+  .gate::after{content:"";position:absolute;top:10%;right:12%;width:420px;height:420px;border-radius:50%;
+    background:radial-gradient(circle,rgba(0,194,212,.16),transparent 62%);pointer-events:none}
+  .gate.hidden{display:none}
+  .gatebox{width:100%;max-width:400px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);
+    border-radius:18px;padding:30px;position:relative;backdrop-filter:blur(6px)}
+  .gate .logo{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;margin-bottom:18px;
+    background:linear-gradient(135deg,#27406e,#152442);color:var(--gold);font-family:var(--disp);font-weight:700;font-size:15px}
+  .gate h2{margin:0 0 6px;color:#fff;font-family:var(--disp);font-size:20px}
+  .gate .badge{display:inline-flex;align-items:center;gap:6px;font-family:var(--disp);font-size:10px;letter-spacing:1.4px;font-weight:600;
+    color:#8FB4FF;border:1px solid rgba(143,180,255,.35);background:rgba(68,87,245,.14);padding:4px 10px;border-radius:999px;margin-bottom:16px}
+  .gate p{color:#9FB0D0;font-size:12.5px;line-height:1.55;margin:0 0 18px}
+  .gate input{width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.16);border-radius:11px;
+    padding:13px 14px;font-family:var(--mono);font-size:15px;color:#fff;letter-spacing:3px}
+  .gate input:focus{outline:none;border-color:var(--accent-2);box-shadow:0 0 0 3px rgba(0,194,212,.22)}
+  .gate .err{display:none;color:#FF8A8F;font-size:12px;font-weight:600;margin-top:9px}
+  .gate .row{display:flex;gap:10px;margin-top:16px}
+  .gate button{flex:1;padding:13px;border-radius:11px;font-family:var(--ui);font-weight:600;font-size:13.5px;cursor:pointer;border:1px solid transparent}
+  .gate .primary{background:linear-gradient(135deg,var(--accent),#5c6bf7);color:#fff}
+  .gate .ghost{background:transparent;border-color:rgba(255,255,255,.18);color:#B9C6E0}
+  .gatebox.shake{animation:shake .34s}
+  @keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-7px)}40%,80%{transform:translateX(7px)}}
+
+  /* ---------- topbar ---------- */
+  .topbar{position:sticky;top:0;z-index:40;background:linear-gradient(135deg,#0C1730,#132A57);border-bottom:1px solid #1e3563;
+    padding:13px 26px;display:flex;align-items:center;gap:16px;color:#fff}
+  .topbar .logo{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;
+    background:linear-gradient(135deg,#27406e,#152442);color:var(--gold);font-family:var(--disp);font-weight:700;font-size:13px}
+  .topbar b{font-family:var(--disp);font-weight:600;font-size:15px}
+  .topbar .abadge{font-family:var(--disp);font-size:10px;letter-spacing:1.4px;font-weight:600;color:#8FB4FF;
+    border:1px solid rgba(143,180,255,.4);background:rgba(68,87,245,.2);padding:3px 9px;border-radius:999px}
+  .topbar .spacer{flex:1}
+  .session{display:flex;align-items:center;gap:8px;font-size:12px;color:#AEBFDD}
+  .session .dot{width:8px;height:8px;border-radius:50%;background:var(--accent-2);box-shadow:0 0 0 0 rgba(0,194,212,.6);animation:pulse 2.2s infinite}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(0,194,212,.5)}70%{box-shadow:0 0 0 8px rgba(0,194,212,0)}100%{box-shadow:0 0 0 0 rgba(0,194,212,0)}}
+  .lockbtn{display:inline-flex;align-items:center;gap:7px;font-family:var(--ui);font-size:12.5px;font-weight:600;
+    padding:8px 13px;border-radius:9px;cursor:pointer;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.06);color:#fff}
+  .lockbtn:hover{background:rgba(255,255,255,.12)}
+  .lockbtn svg{width:15px;height:15px}
+
+  .wrap{max-width:1320px;margin:0 auto;padding:24px 26px 70px}
+  .rights{display:flex;align-items:center;gap:10px;font-size:12.5px;color:var(--muted);margin-bottom:18px;
+    background:var(--accent-soft);border:1px solid rgba(68,87,245,.2);border-radius:10px;padding:11px 15px}
+  .rights svg{color:var(--accent);flex:none}
+  .rights b{color:var(--text)}
+
+  /* ---------- kpi ---------- */
+  .kpis{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:16px;margin-bottom:20px}
+  @media(max-width:1000px){.kpis{grid-template-columns:1fr 1fr}}
+  .kpi{border:1px solid var(--line);border-radius:var(--radius);background:var(--panel);box-shadow:var(--shadow);padding:18px 20px;position:relative;overflow:hidden;transition:transform .2s,box-shadow .2s}
+  .kpi:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg)}
+  .kpi .k{font-size:10px;letter-spacing:.7px;text-transform:uppercase;color:var(--muted-2);font-weight:600}
+  .kpi .v{font-family:var(--mono);font-size:27px;font-weight:600;margin-top:9px;letter-spacing:-.7px}
+  .kpi .d{font-size:11.5px;margin-top:5px;font-family:var(--mono);font-weight:500;color:var(--muted)}
+  .kpi.hero{background:linear-gradient(135deg,#0D1A38,#152C57 55%,#0B1D40);border-color:#1e3563;color:#fff}
+  .kpi.hero::after{content:"";position:absolute;top:-40%;right:-6%;width:230px;height:230px;border-radius:50%;background:radial-gradient(circle,rgba(0,194,212,.22),transparent 62%)}
+  .kpi.hero .k{color:#8CA2CB}.kpi.hero .v{color:#fff;font-size:31px;text-shadow:0 2px 20px rgba(0,194,212,.2)}.kpi.hero .d{color:#9FB0D0}
+  .kpi:not(.hero)::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(180deg,var(--accent),var(--accent-2))}
+
+  .card{border:1px solid var(--line);border-radius:var(--radius);background:var(--panel);box-shadow:var(--shadow)}
+  .card .hd{padding:14px 18px;border-bottom:1px solid var(--line-soft);display:flex;align-items:center;justify-content:space-between}
+  .card .hd h2{margin:0;font-family:var(--disp);font-size:13px;font-weight:600;letter-spacing:.3px}
+  .eyebrow{font-size:9.5px;letter-spacing:1.3px;text-transform:uppercase;color:var(--muted-2)}
+
+  /* accounts table */
+  .tablewrap{overflow-x:auto}
+  table{width:100%;border-collapse:collapse;font-size:12.5px}
+  thead th{text-align:right;padding:11px 16px;font-family:var(--ui);font-weight:600;font-size:10px;letter-spacing:.5px;text-transform:uppercase;color:var(--muted-2);border-bottom:1px solid var(--line-soft);white-space:nowrap}
+  thead th:first-child,tbody td:first-child{text-align:left}
+  tbody td{padding:14px 16px;text-align:right;border-bottom:1px solid var(--line-soft);font-family:var(--mono);white-space:nowrap}
+  tbody tr:last-child td{border-bottom:0}
+  tbody tr:hover{background:#F7F9FC}
+  .acct{display:flex;align-items:center;gap:11px;font-family:var(--ui)}
+  .acct .av{width:34px;height:34px;border-radius:9px;flex:none;display:grid;place-items:center;font-family:var(--disp);font-weight:700;font-size:12px;color:#fff}
+  .acct .nm{font-weight:600}.acct .id{font-family:var(--mono);font-size:10.5px;color:var(--muted)}
+  .status{font-family:var(--disp);font-size:9.5px;font-weight:600;letter-spacing:.5px;padding:4px 9px;border-radius:6px;display:inline-flex;align-items:center;gap:5px}
+  .st-live{background:var(--pos-soft);color:var(--pos)}
+  .st-paused{background:rgba(224,138,11,.12);color:var(--amber)}
+  .st-halted{background:var(--neg-soft);color:var(--neg)}
+  .st-dot{width:6px;height:6px;border-radius:50%;background:currentColor}
+  .acts{display:inline-flex;gap:6px;justify-content:flex-end}
+  .mini{font-family:var(--ui);font-size:11px;font-weight:600;padding:6px 11px;border-radius:8px;border:1px solid var(--line);background:#fff;color:var(--muted);cursor:pointer;transition:.14s}
+  .mini:hover{border-color:var(--muted-2);color:var(--text)}
+  .mini.trade{color:#fff;background:var(--accent);border-color:var(--accent)}
+  .mini.trade:hover{filter:brightness(1.07);color:#fff}
+  .mini.pause:hover{border-color:var(--amber);color:var(--amber)}
+  .mini.cancel:hover{border-color:var(--neg);color:var(--neg)}
+
+  /* desk */
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:20px}
+  @media(max-width:900px){.grid2{grid-template-columns:1fr}}
+  .field{margin-bottom:13px}
+  .field label{font-size:10.5px;letter-spacing:.4px;text-transform:uppercase;color:var(--muted-2);display:block;margin-bottom:6px}
+  .field .rw{display:flex;gap:8px}
+  .field input,.field select{width:100%;background:#fff;border:1px solid var(--line);color:var(--text);border-radius:9px;padding:10px 11px;font-family:var(--mono);font-size:12.5px}
+  .field input:focus,.field select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(68,87,245,.13)}
+  .seg{display:flex;gap:6px}
+  .seg button{flex:1;background:#fff;border:1px solid var(--line);color:var(--muted);border-radius:8px;padding:9px 0;font-family:var(--ui);font-size:12px;font-weight:600;cursor:pointer}
+  .seg button.sel{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+  .seg.side button.buy.sel{border-color:var(--pos);color:var(--pos);background:var(--pos-soft)}
+  .seg.side button.sell.sel{border-color:var(--neg);color:var(--neg);background:var(--neg-soft)}
+  .exec-btn{width:100%;border:0;border-radius:10px;padding:14px;margin-top:4px;cursor:pointer;font-family:var(--disp);font-weight:600;font-size:14px;color:#fff;background:linear-gradient(90deg,var(--accent),#5c6bf7);box-shadow:0 4px 14px rgba(68,87,245,.3)}
+  .exec-btn:hover{filter:brightness(1.06)}
+  .desk-body{padding:18px}
+  .bars{padding:16px 20px;display:flex;flex-direction:column;gap:13px}
+  .barrow{display:grid;grid-template-columns:82px 1fr 96px;align-items:center;gap:12px;font-size:12px}
+  .barrow .track{height:9px;border-radius:5px;background:var(--bg);overflow:hidden}
+  .barrow .fill{height:100%;border-radius:5px}
+  .barrow .amt{font-family:var(--mono);text-align:right;color:var(--muted)}
+
+  /* feed */
+  .log{padding:4px 0;max-height:280px;overflow:hidden}
+  .log .ln{display:grid;grid-template-columns:78px 96px 1fr;gap:14px;padding:11px 20px;border-bottom:1px solid var(--line-soft);font-size:12.5px;align-items:baseline}
+  .log .ln:last-child{border-bottom:0}
+  .log .ts{font-family:var(--mono);color:var(--muted-2);font-size:11.5px}
+  .tag{font-family:var(--disp);font-size:9.5px;font-weight:600;letter-spacing:.5px;padding:3px 8px;border-radius:6px;text-align:center}
+  .tag-agent{background:var(--pos-soft);color:var(--pos)}.tag-admin{background:var(--accent-soft);color:var(--accent)}
+  .tag-client{background:var(--gold-soft);color:var(--gold)}.tag-route{background:#EEF1F6;color:var(--muted)}
+  .log .msg em{color:var(--text);font-style:normal;font-weight:600}
+
+  .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(20px);background:#fff;border:1px solid var(--line);border-radius:11px;padding:13px 18px;box-shadow:0 12px 32px rgba(16,26,49,.16);font-size:13px;opacity:0;pointer-events:none;transition:.3s;z-index:90}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  .sec-title{font-family:var(--disp);font-size:12px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);margin:22px 0 12px}
+  @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<!-- ============ PASSWORD GATE ============ -->
+<div class="gate" id="gate">
+  <div class="gatebox" id="gatebox">
+    <div class="logo">MX1</div>
+    <div class="badge">◆ RESTRICTED · ADMIN</div>
+    <h2>Admin console access</h2>
+    <p>This console has full trade rights on every managed client account. Enter the admin password to continue.</p>
+    <input id="pw" type="password" placeholder="Admin password" autocomplete="off" onkeydown="if(event.key==='Enter')unlock()" />
+    <div class="err" id="err">Incorrect password — access denied.</div>
+    <div class="row">
+      <button class="ghost" onclick="backToClient()">Back to client</button>
+      <button class="primary" onclick="unlock()">Unlock console</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ CONSOLE ============ -->
+<div id="console" style="display:none">
+  <div class="topbar">
+    <div class="logo">MX1</div>
+    <b>Admin Console</b>
+    <span class="abadge">◆ FULL TRADE RIGHTS</span>
+    <div class="spacer"></div>
+    <div class="session"><span class="dot"></span>Admin session · J. Ferrucci</div>
+    <button class="lockbtn" onclick="lockExit()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>Lock &amp; exit</button>
+  </div>
+
+  <div class="wrap">
+    <div class="rights">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z"/><path d="M9.5 12l1.8 1.8L15 10"/></svg>
+      <span>You have <b>full trading discretion</b> on all managed accounts. Every action is written to each client's audit trail. Clients retain instant Pause / Cancel override.</span>
+    </div>
+
+    <div class="kpis">
+      <div class="kpi hero"><div class="k">Total AUM · managed</div><div class="v" id="aum">$20.29M</div><div class="d" id="aumd">across 4 institutional accounts</div></div>
+      <div class="kpi"><div class="k">Accounts live</div><div class="v" id="liveCount">3 / 4</div><div class="d">1 paused by client</div></div>
+      <div class="kpi"><div class="k">Aggregate P&amp;L · today</div><div class="v pos" id="aggPnl">+$77,020</div><div class="d">+0.38% blended</div></div>
+      <div class="kpi"><div class="k">Trades optimized · today</div><div class="v" id="optCount">1,284</div><div class="d">21 agents · 4 venues</div></div>
+    </div>
+
+    <div class="card">
+      <div class="hd"><h2>Managed accounts</h2><span class="eyebrow">Full control</span></div>
+      <div class="tablewrap"><table>
+        <thead><tr><th>Client account</th><th>NAV</th><th>Today</th><th>Leverage</th><th>Positions</th><th>Status</th><th>Actions</th></tr></thead>
+        <tbody id="acctBody"></tbody>
+      </table></div>
+    </div>
+
+    <div class="grid2">
+      <div class="card">
+        <div class="hd"><h2>Trade desk</h2><span class="eyebrow" style="color:var(--accent)">Executes on selected account</span></div>
+        <div class="desk-body">
+          <div class="field"><label>Account</label><select id="deskAcct"></select></div>
+          <div class="field"><label>Pair</label><select><option>BTC/USDT</option><option>ETH/USDT</option><option>SOL/USDT</option><option>AVAX/USDT</option></select></div>
+          <div class="field"><label>Side</label><div class="seg side"><button class="buy sel" onclick="pick(this)">Long</button><button class="sell" onclick="pick(this)">Short</button></div></div>
+          <div class="field"><label>Order type</label><div class="seg"><button class="sel" onclick="pick(this)">Market</button><button onclick="pick(this)">Limit</button><button onclick="pick(this)">TWAP</button></div></div>
+          <div class="field"><label>Size (USDT)</label><input class="mono" value="250,000" /></div>
+          <div class="field"><label>Leverage</label><div class="seg"><button onclick="pick(this)">2×</button><button class="sel" onclick="pick(this)">5×</button><button onclick="pick(this)">10×</button><button onclick="pick(this)">20×</button></div></div>
+          <div class="field rw"><div style="flex:1"><label>Take profit</label><input class="mono" value="72,400" /></div><div style="flex:1"><label>Stop loss</label><input class="mono" value="66,900" /></div></div>
+          <button class="exec-btn" onclick="execTrade()">Execute on account</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="hd"><h2>Smart-route preview</h2></div>
+        <div class="bars">
+          <div class="barrow"><span>OKX US</span><div class="track"><div class="fill" style="width:62%;background:var(--accent)"></div></div><span class="amt">62% · best bid</span></div>
+          <div class="barrow"><span>Binance.US</span><div class="track"><div class="fill" style="width:24%;background:var(--muted-2)"></div></div><span class="amt">24%</span></div>
+          <div class="barrow"><span>Coinbase</span><div class="track"><div class="fill" style="width:14%;background:var(--muted-2)"></div></div><span class="amt">14%</span></div>
+        </div>
+        <div style="padding:0 20px 16px;font-size:12px;color:var(--muted);line-height:1.6">Router estimate: <b class="mono" style="color:var(--text)">4 bps</b> slippage across 6 slices, maker-skewed for rebate.</div>
+        <div class="hd" style="border-top:1px solid var(--line-soft)"><h2>Global agent activity</h2><span class="eyebrow" style="color:var(--gold)">21 agents · all accounts</span></div>
+        <div class="log" id="feed" style="max-height:180px"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const ADMIN_PW='mx1-admin';   // DEMO ONLY — replace with server-side auth in production
+
+  /* ---------- gate ---------- */
+  function reveal(){document.getElementById('gate').classList.add('hidden');document.getElementById('console').style.display='block';init()}
+  function unlock(){
+    if(document.getElementById('pw').value===ADMIN_PW){location.hash='auth-ok';reveal();}
+    else{document.getElementById('err').style.display='block';const b=document.getElementById('gatebox');b.classList.remove('shake');void b.offsetWidth;b.classList.add('shake');}
+  }
+  function backToClient(){location.href='mx1-institutional-console.html'}
+  function lockExit(){location.hash='';location.href='mx1-institutional-console.html'}
+  /* arrive already authenticated from the client page's password step */
+  if(location.hash==='#auth-ok'){reveal();}
+  else{setTimeout(()=>document.getElementById('pw').focus(),80);}
+
+  /* ---------- data ---------- */
+  const accounts=[
+    {id:'INST-4471',name:'Meridian Fund LP',nav:4218904,day:38410,dp:0.92,lev:'1.9×',pos:4,status:'live',c:'#4457F5'},
+    {id:'INST-4472',name:'Halcyon Digital',nav:8740215,day:-21400,dp:-0.24,lev:'2.4×',pos:6,status:'live',c:'#07B266'},
+    {id:'INST-4491',name:'Northwind Capital',nav:5320000,day:47120,dp:0.89,lev:'2.1×',pos:5,status:'live',c:'#E08A0B'},
+    {id:'INST-4480',name:'Ferrucci Family Office',nav:2015680,day:12890,dp:0.64,lev:'0.0×',pos:0,status:'paused',c:'#00C2D4'},
+  ];
+  const money=n=>'$'+Math.round(n).toLocaleString('en-US');
+  const initials=n=>n.split(' ').slice(0,2).map(w=>w[0]).join('');
+
+  function statusTag(s){
+    if(s==='live')return '<span class="status st-live"><span class="st-dot"></span>LIVE</span>';
+    if(s==='paused')return '<span class="status st-paused"><span class="st-dot"></span>PAUSED</span>';
+    return '<span class="status st-halted"><span class="st-dot"></span>HALTED</span>';
+  }
+  function renderAccounts(){
+    document.getElementById('acctBody').innerHTML=accounts.map((a,i)=>{
+      const pc=a.day>=0?'pos':'neg',sg=a.day>=0?'+':'−';
+      const pauseBtn=a.status==='live'
+        ?`<button class="mini pause" onclick="togglePause(${i})">Pause</button>`
+        :`<button class="mini" onclick="togglePause(${i})">Resume</button>`;
+      return `<tr>
+        <td><div class="acct"><span class="av" style="background:${a.c}">${initials(a.name)}</span><div><div class="nm">${a.name}</div><div class="id">${a.id} · OKX US</div></div></div></td>
+        <td>${money(a.nav)}</td>
+        <td class="${pc}">${sg}$${Math.abs(Math.round(a.day)).toLocaleString('en-US')} · ${sg}${Math.abs(a.dp)}%</td>
+        <td>${a.lev}</td>
+        <td>${a.pos}</td>
+        <td>${statusTag(a.status)}</td>
+        <td><span class="acts">
+          <button class="mini trade" onclick="deskFor(${i})">Trade</button>
+          ${pauseBtn}
+          <button class="mini cancel" onclick="cancelAcct(${i})">Cancel</button>
+        </span></td>
+      </tr>`;
+    }).join('');
+  }
+  function refreshKpis(){
+    const aum=accounts.reduce((s,a)=>s+a.nav,0);
+    const live=accounts.filter(a=>a.status==='live').length;
+    const agg=accounts.reduce((s,a)=>s+(a.status==='live'?a.day:0),0);
+    document.getElementById('aum').textContent='$'+(aum/1e6).toFixed(2)+'M';
+    document.getElementById('aumd').textContent='across '+accounts.length+' institutional accounts';
+    document.getElementById('liveCount').textContent=live+' / '+accounts.length;
+    const e=document.getElementById('aggPnl');e.className='v '+(agg>=0?'pos':'neg');
+    e.textContent=(agg>=0?'+$':'−$')+Math.abs(Math.round(agg)).toLocaleString('en-US');
+  }
+  function fillDeskAcct(){document.getElementById('deskAcct').innerHTML=accounts.map((a,i)=>`<option value="${i}">${a.id} · ${a.name}</option>`).join('')}
+
+  /* ---------- actions ---------- */
+  function togglePause(i){
+    accounts[i].status=accounts[i].status==='live'?'paused':'live';
+    if(accounts[i].status==='paused'){accounts[i].lev='0.0×';feedLine('CLIENT',`Admin <em>paused</em> ${accounts[i].id} — no new entries`);}
+    else{feedLine('ADMIN',`Admin <em>resumed</em> ${accounts[i].id} — MX1 trading live`);}
+    renderAccounts();refreshKpis();toast(accounts[i].id+' '+(accounts[i].status==='paused'?'paused':'resumed'));
+  }
+  function cancelAcct(i){
+    accounts[i].status='halted';accounts[i].pos=0;accounts[i].lev='0.0×';accounts[i].day=0;
+    feedLine('ADMIN',`Admin <em>flattened & halted</em> ${accounts[i].id}`);
+    renderAccounts();refreshKpis();toast(accounts[i].id+' flattened and halted');
+  }
+  function deskFor(i){document.getElementById('deskAcct').value=i;document.getElementById('deskAcct').scrollIntoView({behavior:'smooth',block:'center'});toast('Trade desk set to '+accounts[i].id)}
+  function execTrade(){const i=+document.getElementById('deskAcct').value;feedLine('ADMIN',`Admin executed <em>BTC/USDT long 250k</em> on ${accounts[i].id} · OKX · 5×`);toast('Order executed on '+accounts[i].id+' · logged to audit trail')}
+  function pick(b){b.parentNode.querySelectorAll('button').forEach(x=>x.classList.remove('sel'));b.classList.add('sel')}
+
+  /* ---------- feed ---------- */
+  const msgs=[['AGENT','Momentum agent raised BTC trailing stop on <em>Meridian</em>'],['ROUTE','Routed 40% of ETH fill to maker book — <em>Halcyon</em>'],['AGENT','Volatility agent scaled SOL <em>+12%</em> on Northwind'],['AGENT','Drift monitor: all models within tolerance'],['ROUTE','Execution filled 8.4 BTC across 6 slices — <em>4bps</em>'],['AGENT','Risk agent neutralized delta on <em>Halcyon</em> to 0.28'],['AGENT','Sentiment ensemble upgraded ETH conviction to high']];
+  const tagCls={AGENT:'tag-agent',ROUTE:'tag-route',ADMIN:'tag-admin',CLIENT:'tag-client'};
+  const ts=()=>new Date().toTimeString().slice(0,8);
+  function feedLine(tag,msg){const f=document.getElementById('feed');if(!f)return;const l=document.createElement('div');l.className='ln';l.innerHTML=`<span class="ts">${ts()}</span><span class="tag ${tagCls[tag]}">${tag}</span><span class="msg">${msg}</span>`;f.prepend(l);while(f.children.length>30)f.lastChild.remove();}
+
+  let feedTimer,aumTimer;
+  function init(){
+    renderAccounts();refreshKpis();fillDeskAcct();
+    /* AUM count-up */
+    const target=accounts.reduce((s,a)=>s+a.nav,0),el=document.getElementById('aum'),st=performance.now();
+    (function up(now){const p=Math.min((now-st)/900,1),e=1-Math.pow(1-p,3);el.textContent='$'+(target*e/1e6).toFixed(2)+'M';if(p<1)requestAnimationFrame(up)})(st);
+    for(let i=0;i<5;i++){const[t,m]=msgs[Math.floor(Math.random()*msgs.length)];feedLine(t,m);}
+    clearInterval(feedTimer);feedTimer=setInterval(()=>{const[t,m]=msgs[Math.floor(Math.random()*msgs.length)];feedLine(t,m);},2600);
+    /* live drift on live accounts */
+    clearInterval(aumTimer);aumTimer=setInterval(()=>{
+      accounts.forEach(a=>{if(a.status==='live'){a.nav+=(Math.random()-0.45)*1200;a.day+=(Math.random()-0.45)*1200;}});
+      renderAccounts();refreshKpis();
+    },3000);
+  }
+
+  let tT;function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(tT);tT=setTimeout(()=>t.classList.remove('show'),3000)}
+</script>
+</body>
+</html>
