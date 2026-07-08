@@ -370,6 +370,8 @@
   .mrh-cell .conv>div{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--accent),var(--accent-2));box-shadow:0 0 10px rgba(63,233,255,.4)}
   .mrh-cell .row2{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:9px}
   @media(max-width:900px){.mrh-read{grid-template-columns:1fr 1fr}}
+  .mx1-badge{font-family:var(--disp);font-size:9px;font-weight:700;letter-spacing:.4px;padding:2px 7px;border-radius:5px;margin-left:8px;
+    background:linear-gradient(135deg,var(--accent-soft),rgba(63,233,255,.14));color:var(--accent-2);border:1px solid rgba(63,233,255,.32);white-space:nowrap;box-shadow:0 0 12px rgba(63,233,255,.18)}
   ::-webkit-scrollbar{width:10px;height:10px}
   ::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:6px;border:2px solid transparent;background-clip:padding-box}
   ::-webkit-scrollbar-track{background:transparent}
@@ -722,7 +724,7 @@
   function posRowFull(p){
     const s=p.side==='long'?'<span class="side-tag long">LONG</span>':'<span class="side-tag short">SHORT</span>';
     const cl=p.pnl>=0?'pos':'neg',sg=p.pnl>=0?'+':'−';
-    return `<tr><td><div class="sym"><span class="coin" style="background:${coins[p.coin]}">${p.coin}</span><div>${p.sym}<div class="type-tag">${p.type}</div></div></div></td>
+    return `<tr><td><div class="sym"><span class="coin" style="background:${coins[p.coin]}">${p.coin}</span><div>${p.sym}${p.mx1?'<span class="mx1-badge">◇ MX1 · desk</span>':''}<div class="type-tag">${p.type}</div></div></div></td>
       <td>${s}</td><td>${p.size}</td><td>${money(p.notional)}</td><td>$${fmt(p.entry)}</td><td>$${fmt(p.mark)}</td>
       <td>$${fmt(p.tp)} <span class="managed-tag">·M</span></td><td>$${fmt(p.sl)} <span class="managed-tag">·M</span></td>
       <td class="${cl}">${sg}$${fmt(Math.abs(p.pnl),0)}</td><td class="${cl}">${sg}${fmt(Math.abs(p.pct))}%</td>
@@ -736,7 +738,7 @@
     document.getElementById('ovPos').innerHTML=positions.map(p=>{
       const s=p.side==='long'?'<span class="side-tag long">LONG</span>':'<span class="side-tag short">SHORT</span>';
       const cl=p.pnl>=0?'pos':'neg',sg=p.pnl>=0?'+':'−';
-      return `<tr><td><div class="sym"><span class="coin" style="background:${coins[p.coin]}">${p.coin}</span>${p.sym}</div></td><td>${s}</td><td>$${fmt(p.mark)}</td><td class="${cl}">${sg}$${fmt(Math.abs(p.pnl),0)}</td><td class="${cl}">${sg}${fmt(Math.abs(p.pct))}%</td></tr>`;
+      return `<tr><td><div class="sym"><span class="coin" style="background:${coins[p.coin]}">${p.coin}</span>${p.sym}${p.mx1?'<span class="mx1-badge">◇ MX1</span>':''}</div></td><td>${s}</td><td>$${fmt(p.mark)}</td><td class="${cl}">${sg}$${fmt(Math.abs(p.pnl),0)}</td><td class="${cl}">${sg}${fmt(Math.abs(p.pct))}%</td></tr>`;
     }).join('');
   }
   renderPositions();
@@ -821,7 +823,7 @@
   function tradeToPosition(t){
     const sizeCoin=t.notional/t.entry;
     const sizeStr=sizeCoin>=100?Math.round(sizeCoin).toLocaleString('en-US'):sizeCoin.toFixed(2);
-    return {id:t.id,sym:t.pair,coin:t.coin,type:t.type||'Futures',side:t.side,size:sizeStr,notional:t.notional,entry:t.entry,mark:t.entry,tp:t.tp,sl:t.sl,pnl:0,pct:0};
+    return {id:t.id,sym:t.pair,coin:t.coin,type:t.type||'Futures',side:t.side,size:sizeStr,notional:t.notional,entry:t.entry,mark:t.entry,tp:t.tp,sl:t.sl,pnl:0,pct:0,mx1:true};
   }
   function syncTrades(live){
     const mine=loadTrades().filter(t=>t.account===ACCOUNT_ID);let added=0;
@@ -831,6 +833,23 @@
   }
   syncTrades(false);
   window.addEventListener('storage',e=>{if(e.key===STORE_KEY)syncTrades(true)});
+
+  /* ---------- live P&L drift ---------- */
+  function driftPositions(){
+    if(document.body.classList.contains('paused')||!positions.length)return;
+    let totUnreal=0;
+    positions.forEach(p=>{
+      const qty=p.notional/p.entry;
+      p.mark=p.mark+(Math.random()-0.47)*p.entry*0.0009;
+      p.pnl=(p.mark-p.entry)*qty*(p.side==='long'?1:-1);
+      p.pct=p.pnl/p.notional*100;
+      totUnreal+=p.pnl;
+    });
+    renderPositions();
+    const u=document.getElementById('ovUnreal');
+    if(u){u.className='v '+(totUnreal>=0?'pos':'neg');u.textContent=(totUnreal>=0?'+$':'−$')+Math.abs(Math.round(totUnreal)).toLocaleString('en-US');}
+  }
+  setInterval(driftPositions,2500);
 
   /* ---------- live nav ---------- */
   let nav=4218904,day=38410;
