@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>MX1 — Completing login</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Sora:wght@400;500;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --bg:#0A0E1A;--card-top:#1A2B49;--card-bot:#111C33;
+    --line:rgba(90,130,220,.16);--line-soft:rgba(255,255,255,.06);
+    --text:#E9EFF9;--muted:#8A97AD;--muted-2:#5A6883;
+    --blue:#4B8BF4;--teal:#2FB6C9;--green:#37C98D;
+    --grad:linear-gradient(90deg,#3B7DE0 0%,#2FB0C4 52%,#37C98D 100%);
+    --pos:#37C98D;--pos-soft:rgba(55,201,141,.13);
+    --serif:"Playfair Display",Georgia,serif;--disp:"Sora",system-ui,sans-serif;--ui:"Inter",system-ui,sans-serif;--mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+  }
+  *{box-sizing:border-box}html,body{margin:0;padding:0}
+  body{background:var(--bg);color:var(--text);font-family:var(--ui);-webkit-font-smoothing:antialiased;min-height:100vh;
+    display:flex;align-items:center;justify-content:center;padding:34px 18px;position:relative;overflow-x:hidden}
+  body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
+    background:radial-gradient(820px 560px at 84% -6%, rgba(75,139,244,.14), transparent 60%),
+      radial-gradient(760px 560px at 10% 108%, rgba(55,201,141,.10), transparent 60%)}
+  .card{position:relative;z-index:1;width:100%;max-width:460px;border:1px solid var(--line);border-radius:20px;
+    background:linear-gradient(180deg,var(--card-top),var(--card-bot));
+    box-shadow:0 1px 1px rgba(0,0,0,.4),0 34px 90px rgba(0,0,0,.55);padding:34px 30px 28px;overflow:hidden;text-align:center}
+  .card::after{content:"";position:absolute;left:0;right:0;top:0;height:2.5px;background:var(--grad)}
+  .logo-word{font-family:var(--disp);font-weight:800;font-size:38px;letter-spacing:-1.8px;line-height:1;
+    background:linear-gradient(115deg,#5A93F7 8%,#2FB6C9 52%,#37C98D 96%);-webkit-background-clip:text;background-clip:text;color:transparent;display:inline-block}
+  .dom{font-size:11px;color:#7FA9C9;letter-spacing:.5px;margin-top:2px;opacity:.85}
+  .spinner{width:46px;height:46px;border-radius:50%;margin:22px auto 4px;
+    background:conic-gradient(from 0deg,transparent 0 30%,#3B7DE0 55%,#37C98D 92%,transparent);
+    -webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 4px),#000 0);mask:radial-gradient(farthest-side,transparent calc(100% - 4px),#000 0);
+    animation:spin 1s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  h1{font-family:var(--serif);font-weight:600;font-size:23px;margin:16px 0 6px}
+  .sub{font-size:12.5px;color:var(--muted);margin:0 0 22px}
+  .steps{display:flex;flex-direction:column;gap:9px;text-align:left}
+  .step{display:flex;align-items:center;gap:12px;border:1px solid var(--line-soft);border-radius:11px;padding:13px 15px;
+    font-size:13px;color:var(--muted-2);background:rgba(255,255,255,.015);transition:.3s}
+  .step .mk{width:24px;height:24px;border-radius:50%;flex:none;display:grid;place-items:center;font-family:var(--mono);font-size:11px;font-weight:600;
+    border:1.5px solid rgba(255,255,255,.14);color:var(--muted-2);background:transparent;transition:.3s}
+  .step .mk svg{width:13px;height:13px;opacity:0}
+  .step.active{color:var(--text);border-color:rgba(47,176,201,.34);background:rgba(47,176,201,.06)}
+  .step.active .mk{border-color:transparent;background:var(--grad);color:#fff}
+  .step.done{color:var(--text);border-color:rgba(55,201,141,.28);background:rgba(55,201,141,.06)}
+  .step.done .mk{border-color:transparent;background:var(--pos-soft);color:var(--pos)}
+  .step.done .mk span{display:none}.step.done .mk svg{opacity:1}
+  .bar{height:6px;border-radius:4px;background:rgba(255,255,255,.06);overflow:hidden;margin:20px 0 12px}
+  .bar .fill{height:100%;width:8%;border-radius:4px;background:var(--grad);transition:width .6s ease}
+  .hint{font-size:11px;color:var(--muted-2)}
+  @media(prefers-reduced-motion:reduce){.spinner{animation:none}}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="logo-word">MX1</div>
+    <div class="dom">mx1trade.com</div>
+    <div class="spinner"></div>
+    <h1>Completing login</h1>
+    <p class="sub" id="statusLine">Fetching account &amp; balance data…</p>
+    <div class="steps" id="steps"></div>
+    <div class="bar"><div class="fill" id="fill"></div></div>
+    <div class="hint">This usually takes a few seconds</div>
+  </div>
+<script>
+  /* ===== flow wiring — point these at your real destinations ===== */
+  const DEST={
+    inst:'mx1-institutional-console.html',        // institutional client portal
+    retail:'https://app.mx1trade.com/trade'       // your retail app
+  };
+  const mode=(new URLSearchParams(location.search).get('mode')==='inst')?'inst':'retail';
+
+  const STEPS = mode==='inst'
+    ? ['Mandate authorization verified','Fetching account & balance data','Syncing trading configuration','Preparing your institutional console']
+    : ['OKX authorization verified','Fetching account & balance data','Syncing trading configuration','Preparing your dashboard'];
+
+  const wrap=document.getElementById('steps'), fill=document.getElementById('fill'), status=document.getElementById('statusLine');
+  wrap.innerHTML=STEPS.map((t,i)=>`<div class="step" id="s${i}"><span class="mk"><span>${i+1}</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></span>${t}</div>`).join('');
+
+  let i=0;
+  function tick(){
+    for(let k=0;k<STEPS.length;k++){const el=document.getElementById('s'+k);el.classList.remove('active','done');if(k<i)el.classList.add('done');else if(k===i)el.classList.add('active');}
+    fill.style.width=Math.min(8+(i/STEPS.length)*92,100)+'%';
+    if(i<STEPS.length){status.textContent=STEPS[i].replace(/^\w/,c=>c.toUpperCase())+'…';i++;setTimeout(tick,850);}
+    else{document.getElementById('s'+(STEPS.length-1)).classList.add('done');fill.style.width='100%';status.textContent='Ready — opening your dashboard';
+      setTimeout(()=>{location.href=DEST[mode];},700);}
+  }
+  setTimeout(tick,500);
+</script>
+</body>
+</html>
